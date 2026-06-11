@@ -1,7 +1,13 @@
 import { Injectable, computed, inject } from '@angular/core';
 
 import { FilterService } from '@core/filter/filter-service';
-import { FilterOption, applyFilters } from '@core/filter/product-filter';
+import {
+  FacetKey,
+  FilterOption,
+  applyFilters,
+  distinctValues,
+  facetValue,
+} from '@core/filter/product-filter';
 import { Product } from '@core/models/product';
 import { SheetsData } from '@core/sheets/sheets-data';
 import { STOCK_VARIANTS, resolveStockVariant } from '@core/stock-status';
@@ -60,5 +66,36 @@ export class ProductSearchStore {
   /** Real selected values (empty = "All"). */
   readonly statusSelected = computed<string[]>(() => [
     ...this.filters.selectedFor('status')(),
+  ]);
+
+  // ----- Category & Sub-category facets (US-09) -----
+  /** Data-driven options for a facet, greyed when absent from the search. */
+  private optionsFrom(facet: FacetKey, source: readonly Product[]): FilterOption[] {
+    const value = facetValue[facet];
+    const present = new Set(this.searchResults().map(value));
+    return distinctValues(source, value)
+      .sort((a, b) => a.localeCompare(b))
+      .map((v) => ({ label: v, value: v, disabled: !present.has(v) }));
+  }
+
+  readonly categoryOptions = computed<FilterOption[]>(() =>
+    this.optionsFrom('category', this.sheets.results()),
+  );
+  readonly categorySelected = computed<string[]>(() => [
+    ...this.filters.selectedFor('category')(),
+  ]);
+
+  /** Sub-category options cascade on the selected categories (AC-04/05). */
+  private readonly subCategoryScope = computed<readonly Product[]>(() => {
+    const cats = this.filters.selectedFor('category')();
+    const active = this.sheets.results();
+    return cats.size === 0 ? active : active.filter((p) => cats.has(p.category));
+  });
+
+  readonly subCategoryOptions = computed<FilterOption[]>(() =>
+    this.optionsFrom('subCategory', this.subCategoryScope()),
+  );
+  readonly subCategorySelected = computed<string[]>(() => [
+    ...this.filters.selectedFor('subCategory')(),
   ]);
 }

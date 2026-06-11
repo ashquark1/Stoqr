@@ -13,6 +13,28 @@ import { SheetsData } from '@core/sheets/sheets-data';
 import { ProductSearchStore } from './product-search-store';
 import { SECONDARY_ONLY_MESSAGE } from './search-validation';
 
+function rawWithCats(
+  rows: ReadonlyArray<{ name: string; category: string; subCategory: string }>,
+): string {
+  const table = {
+    cols: [
+      { id: 'A', label: 'id', type: 'number' },
+      { id: 'B', label: 'product name', type: 'string' },
+      { id: 'C', label: 'category', type: 'string' },
+      { id: 'D', label: 'sub category', type: 'string' },
+      { id: 'E', label: 'status', type: 'string' },
+    ],
+    rows: rows.map((r, i) => ({
+      c: [{ v: i + 1 }, { v: r.name }, { v: r.category }, { v: r.subCategory }, { v: 'Active' }],
+    })),
+  };
+  return (
+    '/*O_o*/\ngoogle.visualization.Query.setResponse(' +
+    JSON.stringify({ version: '0.6', reqId: '0', status: 'ok', table }) +
+    ');'
+  );
+}
+
 function rawWithStock(
   rows: ReadonlyArray<{ name: string; stockStatus: string }>,
 ): string {
@@ -115,5 +137,40 @@ describe('ProductSearchStore', () => {
       'Oximeter B',
     ]);
     expect(store.statusSelected()).toEqual(['low-stock']);
+  });
+
+  // US-09: category/sub-category options derive from data; sub-category cascades.
+  it('derives category options and cascades sub-category on selected categories', () => {
+    const filters = TestBed.inject(FilterService);
+    sheets.searchNow('item');
+    httpMock.expectOne(URL).flush(
+      rawWithCats([
+        { name: 'item 1', category: 'Devices', subCategory: 'Monitoring' },
+        { name: 'item 2', category: 'Devices', subCategory: 'Imaging' },
+        { name: 'item 3', category: 'Consumables', subCategory: 'Gauze' },
+      ]),
+    );
+
+    expect(store.categoryOptions().map((o) => o.value)).toEqual([
+      'Consumables',
+      'Devices',
+    ]);
+    // No category selected → all sub-categories available.
+    expect(store.subCategoryOptions().map((o) => o.value)).toEqual([
+      'Gauze',
+      'Imaging',
+      'Monitoring',
+    ]);
+
+    // Select Devices → sub-category scoped to Devices, results narrowed.
+    filters.setSelected('category', ['Devices']);
+    expect(store.subCategoryOptions().map((o) => o.value)).toEqual([
+      'Imaging',
+      'Monitoring',
+    ]);
+    expect(store.visibleProducts().map((p) => p.productName)).toEqual([
+      'item 1',
+      'item 2',
+    ]);
   });
 });

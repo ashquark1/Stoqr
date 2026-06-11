@@ -6,6 +6,20 @@
     (selectedChange)="onStatus($event)"
   />
 
+  <stoqr-filter-select
+    label="Category"
+    [options]="categoryOptions()"
+    [selected]="categorySelected()"
+    (selectedChange)="onCategory($event)"
+  />
+
+  <stoqr-filter-select
+    label="Sub-category"
+    [options]="subCategoryOptions()"
+    [selected]="subCategorySelected()"
+    (selectedChange)="onSubCategory($event)"
+  />
+
   <button
     type="button"
     class="stoqr-btn stoqr-btn--ghost filter-panel__reset"
