@@ -35,6 +35,28 @@ function rawWithCats(
   );
 }
 
+function rawWithBrand(
+  rows: ReadonlyArray<{ name: string; brand: string; category: string }>,
+): string {
+  const table = {
+    cols: [
+      { id: 'A', label: 'id', type: 'number' },
+      { id: 'B', label: 'product name', type: 'string' },
+      { id: 'C', label: 'brand', type: 'string' },
+      { id: 'D', label: 'category', type: 'string' },
+      { id: 'E', label: 'status', type: 'string' },
+    ],
+    rows: rows.map((r, i) => ({
+      c: [{ v: i + 1 }, { v: r.name }, { v: r.brand }, { v: r.category }, { v: 'Active' }],
+    })),
+  };
+  return (
+    '/*O_o*/\ngoogle.visualization.Query.setResponse(' +
+    JSON.stringify({ version: '0.6', reqId: '0', status: 'ok', table }) +
+    ');'
+  );
+}
+
 function rawWithStock(
   rows: ReadonlyArray<{ name: string; stockStatus: string }>,
 ): string {
@@ -172,5 +194,26 @@ describe('ProductSearchStore', () => {
       'item 1',
       'item 2',
     ]);
+  });
+
+  // US-10: brand options are independent of category; brand facet filters.
+  it('derives brand options independent of category and filters by brand', () => {
+    const filters = TestBed.inject(FilterService);
+    sheets.searchNow('item');
+    httpMock.expectOne(URL).flush(
+      rawWithBrand([
+        { name: 'item 1', brand: 'Dr Trust', category: 'Devices' },
+        { name: 'item 2', brand: 'BPL', category: 'Consumables' },
+      ]),
+    );
+    expect(store.brandOptions().map((o) => o.value)).toEqual(['BPL', 'Dr Trust']);
+
+    // Selecting a category must not change the brand options (AC-04).
+    filters.setSelected('category', ['Devices']);
+    expect(store.brandOptions().map((o) => o.value)).toEqual(['BPL', 'Dr Trust']);
+
+    filters.reset();
+    filters.setSelected('brand', ['BPL']);
+    expect(store.visibleProducts().map((p) => p.productName)).toEqual(['item 2']);
   });
 });

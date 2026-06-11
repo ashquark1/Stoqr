@@ -27,6 +27,8 @@ export class FilterPanel {
   protected readonly categorySelected = this.store.categorySelected;
   protected readonly subCategoryOptions = this.store.subCategoryOptions;
   protected readonly subCategorySelected = this.store.subCategorySelected;
+  protected readonly brandOptions = this.store.brandOptions;
+  protected readonly brandSelected = this.store.brandSelected;
 
   protected onStatus(values: string[]): void {
     this.filters.setSelected('status', values);
@@ -38,6 +40,10 @@ export class FilterPanel {
 
   protected onSubCategory(values: string[]): void {
     this.filters.setSelected('subCategory', values);
+  }
+
+  protected onBrand(values: string[]): void {
+    this.filters.setSelected('brand', values);
   }
 
   protected reset(): void {

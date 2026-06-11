@@ -98,4 +98,12 @@ export class ProductSearchStore {
   readonly subCategorySelected = computed<string[]>(() => [
     ...this.filters.selectedFor('subCategory')(),
   ]);
+
+  // ----- Brand facet (US-10): always all brands, independent of category -----
+  readonly brandOptions = computed<FilterOption[]>(() =>
+    this.optionsFrom('brand', this.sheets.results()),
+  );
+  readonly brandSelected = computed<string[]>(() => [
+    ...this.filters.selectedFor('brand')(),
+  ]);
 }

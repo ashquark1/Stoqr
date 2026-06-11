@@ -20,6 +20,14 @@
     (selectedChange)="onSubCategory($event)"
   />
 
+  <stoqr-filter-select
+    label="Brand"
+    [options]="brandOptions()"
+    [selected]="brandSelected()"
+    [showSearch]="true"
+    (selectedChange)="onBrand($event)"
+  />
+
   <button
     type="button"
     class="stoqr-btn stoqr-btn--ghost filter-panel__reset"
