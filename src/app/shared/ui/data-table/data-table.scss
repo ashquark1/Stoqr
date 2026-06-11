@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+// Rows are clickable (open the detail modal). This tr is rendered in this
+// component's view, so the scoped class reaches it; PrimeNG-internal styling
+// lives in the global _primeng-overrides.scss.
+.stoqr-data-table__row {
+  cursor: pointer;
+}

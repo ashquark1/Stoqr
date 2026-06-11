@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "deny": [
+      "Write(src/environments/**)",
+      "Edit(src/environments/**)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {

@@ -56,8 +56,12 @@ principles behind those rules for humans.
 - [ ] For core changes: DECISIONS.md / AI_CONTRACT.md / projectmap.md updated
 
 ## Off-Limits Files
-None declared yet. Add files here (and to .claude/settings.json) when auth,
-API keys, the spreadsheet URL/credentials, or env config are introduced.
+- `src/environments/*` — holds the Google Sheet gviz endpoint URL (data-source
+  config). Do not modify without explicit confirmation. Mirrored as a deny rule
+  in .claude/settings.json.
+
+Add further files here (and to .claude/settings.json) when auth, API keys, or
+other spreadsheet credentials/env config are introduced.
 
 ## Anti-Patterns We Don't Accept
 - Writing to the Google Sheet from the frontend (V1 is read-only).

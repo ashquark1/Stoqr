@@ -1,0 +1,126 @@
+<div class="page" [class.page--active]="isSearchActive()">
+  <header class="shell">
+    <div class="shell__inner">
+      <stoqr-logo class="shell__logo" [inline]="isSearchActive()" />
+
+      <div class="shell__searchrow" role="search">
+        <div
+          class="stoqr-search"
+          [class.stoqr-search--hero]="!isSearchActive()"
+          [class.stoqr-search--inline]="isSearchActive()"
+        >
+          <input
+            type="search"
+            class="stoqr-search__input"
+            placeholder="Search by product name, SKU, brand or category..."
+            autocomplete="off"
+            aria-label="Search products"
+            [formControl]="searchControl"
+            (input)="onInput()"
+            (keyup.enter)="onSearch()"
+          />
+        </div>
+        <button
+          type="button"
+          class="stoqr-btn stoqr-btn--primary icon-btn"
+          [class.icon-btn--lg]="!isSearchActive()"
+          (click)="onSearch()"
+          aria-label="Search"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          <span class="icon-btn__label">Search</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  @if (isSearchActive()) {
+    <section class="results">
+      @if (loading()) {
+        <stoqr-loading-overlay label="Fetching products…" />
+      } @else {
+        <div class="results__toolbar">
+          <span class="stoqr-results__count">
+            {{ resultCount() }} result{{ resultCount() === 1 ? '' : 's' }}
+          </span>
+          <button
+            type="button"
+            class="stoqr-refresh icon-btn"
+            [disabled]="refreshing()"
+            [attr.aria-busy]="refreshing()"
+            [attr.aria-label]="refreshing() ? 'Refreshing' : 'Refresh Results'"
+            (click)="onRefresh()"
+          >
+            @if (refreshing()) {
+              <span class="stoqr-spinner" aria-hidden="true"></span>
+              <span class="icon-btn__label">Refreshing…</span>
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" /></svg>
+              <span class="icon-btn__label">Refresh Results</span>
+            }
+          </button>
+        </div>
+
+        @if (message(); as m) {
+          <stoqr-empty-state [message]="m" />
+        } @else if (resultCount() === 0) {
+          <stoqr-empty-state message="No products match your search." />
+        } @else {
+          <stoqr-data-table
+            [columns]="columns"
+            [rows]="rows()"
+            [cellTemplates]="cellTemplates()"
+            (rowSelect)="onRowSelect($event)"
+          />
+        }
+      }
+    </section>
+  }
+</div>
+
+@if (error(); as msg) {
+  <stoqr-toast
+    [message]="msg"
+    (retry)="onRetry()"
+    (dismiss)="onDismissError()"
+  />
+}
+
+<stoqr-modal
+  [open]="modalOpen()"
+  [header]="selectedProduct()?.productName ?? ''"
+  (close)="onModalClose()"
+>
+  @if (selectedProduct(); as p) {
+    @for (group of groups; track group.title) {
+      <div class="stoqr-field-group">
+        <div class="stoqr-field-group__title">{{ group.title }}</div>
+        <div class="stoqr-field-group__grid">
+          @for (field of group.fields; track field.key) {
+            <div class="stoqr-field">
+              <div class="stoqr-field__label">{{ field.label }}</div>
+              <div
+                class="stoqr-field__value"
+                [class.stoqr-field__value--mono]="field.mono"
+              >
+                @if (field.badge) {
+                  <stoqr-badge [status]="p.stockStatus" />
+                } @else {
+                  {{ display(p[field.key]) }}
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</stoqr-modal>
+
+<!-- Custom table cell renderers (consumed by stoqr-data-table via cellTemplates). -->
+<ng-template #stockStatusTpl let-value>
+  <stoqr-badge [status]="value" />
+</ng-template>
+<ng-template #stockQtyTpl let-value let-row="row">
+  <span [class]="qtyClass(row)">{{ display(value) }}</span>
+</ng-template>

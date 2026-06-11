@@ -8,7 +8,8 @@
 - State is exposed as Angular signals from services. No NgRx, Akita, or ad-hoc global mutable singletons in V1.
 - No `any`, no `@ts-ignore`, no `@ts-nocheck`. Strict mode stays on. Fix the type, don't silence it.
 - Standalone components only. No NgModules. Components use `ChangeDetectionStrategy.OnPush`.
-- No external validation, UI, or CSS framework added without an explicit decision logged in DECISIONS.md (Q-G2: use proper framework guidelines, not one-off dependencies).
+- No external validation, UI, or CSS framework added without an explicit decision logged in DECISIONS.md (Q-G2: use proper framework guidelines, not one-off dependencies). The approved component library is PrimeNG (styled mode, `StoqrPreset`); the design system is first-party Stoqr SCSS.
+- Features must consume the `shared/ui` wrappers (`<stoqr-data-table>`, `<stoqr-modal>`, …), never PrimeNG `p-*` components directly. Vendor coupling lives only inside `src/app/shared/ui/`.
 
 ## Domain Rules
 
@@ -28,6 +29,9 @@
 - Adding `if (specificValue)` special-cases to make one row/product behave differently — fix the model or mapping instead.
 - Copy-pasting a component/service and tweaking it instead of extracting a shared piece (design deterioration — Q-G3).
 - Suppressing TypeScript or template errors instead of resolving them.
+- Exposing the internal sheet column `id` (`_row_id`): it must never appear on the `Product` model, in any signal, or in any component/template. It is stripped during row→model mapping by the `DataMapping` service (`src/app/core/sheets/data-mapping.ts`) via the configurable `INTERNAL_FIELDS` list. To exclude a future internal column, add its sheet label to `INTERNAL_FIELDS` — nowhere else.
+- Hardcoding hex colors, font families, or spacing values in component SCSS — use the design tokens (`var(--token)`) / `.stoqr-*` classes from `src/styles/stoqr-theme.scss`.
+- `max-width` media queries. Styling is mobile-first: base = mobile, overrides via `min-width` only (768/1024/1440) using the `from()` mixin in `src/styles/_breakpoints.scss`.
 
 ## Self-Enforcing Contract
 After any core domain change, Claude must:

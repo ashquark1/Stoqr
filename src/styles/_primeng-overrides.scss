@@ -1,0 +1,84 @@
+// ============================================================
+// PrimeNG brand overrides (global, UNLAYERED)
+// ============================================================
+// PrimeNG emits its styles into the `primeng` @layer (configured in
+// app.config.ts). Unlayered CSS always beats layered CSS, so the rules here win
+// over PrimeNG's base without `!important`. Use this file for brand fine-tuning
+// that the preset can't reach — especially OVERLAY-rendered components
+// (p-dialog, paginator popups) that live outside component-scoped styles.
+//
+// Reference design tokens via var(--token) only — never hardcode values.
+
+// --- Results table: match the Stoqr table spec ---
+.stoqr-data-table {
+  .p-datatable-table-container {
+    border: var(--border-thin);
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+
+  .p-datatable-thead > tr > th {
+    background: var(--color-paper);
+    font-size: var(--text-label);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-light);
+    border-bottom: var(--border-thin);
+    white-space: nowrap;
+    padding: 9px var(--space-3);
+  }
+
+  .p-datatable-tbody > tr {
+    transition: background var(--transition-fast);
+
+    > td {
+      color: var(--color-ink-mid);
+      border-bottom: 0.5px solid var(--color-dew);
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--text-body);
+    }
+
+    &:hover > td {
+      background: var(--color-paper);
+    }
+  }
+}
+
+// --- Pagination: match .stoqr-pagination spec ---
+.p-paginator {
+  background: transparent;
+  padding: var(--space-3) 0;
+  color: var(--color-ink-light);
+  font-size: var(--text-label);
+
+  .p-paginator-current {
+    color: var(--color-ink-light);
+    font-size: var(--text-label);
+  }
+}
+
+// --- Dialog: match .stoqr-modal spec (rendered in a body overlay) ---
+.stoqr-modal-dialog.p-dialog {
+  // Fixed modal dimensions per the brand spec (no spacing token for these).
+  width: 520px;
+  max-width: 92vw;
+  border: var(--border-thin);
+  border-radius: var(--radius-2xl);
+  background: var(--color-white);
+  box-shadow: var(--shadow-modal);
+
+  .p-dialog-header {
+    background: var(--color-paper);
+    border-bottom: var(--border-thin);
+    padding: 14px 18px;
+    color: var(--color-ink);
+    font-size: var(--text-h2);
+    font-weight: 600;
+  }
+
+  .p-dialog-content {
+    padding: var(--space-4) 18px;
+    background: var(--color-white);
+  }
+}

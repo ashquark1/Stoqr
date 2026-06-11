@@ -14,9 +14,14 @@ V1 scope: read-only. Search and view product stock. Data lives in a single Googl
 - Data fetching: Angular `HttpClient` only, wrapped in a data-access service. No `HttpClient` in components.
 - Data source: one Google Sheet, READ-ONLY in V1. The frontend never writes to the sheet.
 - Forms: Reactive Forms + built-in Validators only. No external validation library in V1.
-- Styling: component-scoped SCSS. No CSS/UI framework chosen — ask before adding one.
+- Styling: component-scoped SCSS over the Stoqr design system (`src/styles/stoqr-theme.scss`). Reference design tokens via `var(--token)` and the `.stoqr-*` classes — never hardcode hex, font, or spacing. Mobile-first: base styles target mobile; add overrides with `min-width` only (768/1024/1440) via the `from()` mixin in `src/styles/_breakpoints.scss` — never `max-width`. Brand spec: @docs/stoqr-brand.md. No third-party CSS/UI framework — ask before adding one.
+- UI components: PrimeNG (styled mode, `StoqrPreset`) is the approved component library. Features consume our `shared/ui` wrappers (`<stoqr-data-table>`, `<stoqr-modal>`, …) — never `p-*` directly.
 - Testing: Vitest via `ng test`.
 - Components: standalone, `ChangeDetectionStrategy.OnPush`, signal-based. No NgModules.
+
+## Project Structure (feature-based, layered)
+- `src/app/core/` — singletons, domain models, data-access (no UI). `src/app/shared/` — reusable presentational kit (`ui/` wraps vendor libs, `util/`, `models/`). `src/app/features/<feature>/` — lazy feature areas. `src/styles/` — design system (`stoqr-theme.scss`, `_breakpoints.scss`, `primeng-preset.ts`, `brand-tokens.ts`).
+- Path aliases: `@core/*`, `@shared/*`, `@features/*`, `@styles/*`, `@env/*`. Wrap third-party libraries in `shared/ui/` so features stay vendor-agnostic.
 
 ## Naming Conventions (Angular 21 style guide)
 - Files: kebab-case, NO `.component`/`.service` suffix (e.g. `product-list.ts`, `product-store.ts`) — match the scaffold (`app.ts`, `app.config.ts`).
@@ -32,7 +37,8 @@ V1 scope: read-only. Search and view product stock. Data lives in a single Googl
 - Standalone components only. No NgModules.
 
 ## Off-Limits (never modify without explicit confirmation)
-None declared yet. When auth, API keys, or env config are added, list them here and in `.claude/settings.json`.
+- `src/environments/*` — Google Sheet gviz endpoint config (mirrored as a deny rule in `.claude/settings.json`).
+When auth, API keys, or other env config are added, list them here and in `.claude/settings.json`.
 
 ## Reference Docs (use @-syntax to load when needed)
 - Project map: @docs/projectmap.md

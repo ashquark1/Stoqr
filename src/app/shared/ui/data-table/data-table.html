@@ -1,0 +1,34 @@
+<p-table
+  [value]="[...rows()]"
+  [paginator]="true"
+  [rows]="pageSize()"
+  [rowsPerPageOptions]="[...pageSizeOptions()]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} results"
+  [scrollable]="true"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      @for (col of columns(); track col.key) {
+        <th>{{ col.header }}</th>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-rowData>
+    <tr class="stoqr-data-table__row" (click)="rowSelect.emit(rowData)">
+      @for (col of columns(); track col.key) {
+        <td [class]="cellClass(col)">
+          @if (templateFor(col.key); as tpl) {
+            <ng-container
+              [ngTemplateOutlet]="tpl"
+              [ngTemplateOutletContext]="{ $implicit: rowData[col.key], row: rowData }"
+            />
+          } @else {
+            {{ display(rowData[col.key]) }}
+          }
+        </td>
+      }
+    </tr>
+  </ng-template>
+</p-table>
