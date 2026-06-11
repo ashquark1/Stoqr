@@ -1,0 +1,16 @@
+<div class="filter-panel">
+  <stoqr-filter-select
+    label="Stock Status"
+    [options]="statusOptions()"
+    [selected]="statusSelected()"
+    (selectedChange)="onStatus($event)"
+  />
+
+  <button
+    type="button"
+    class="stoqr-btn stoqr-btn--ghost filter-panel__reset"
+    (click)="reset()"
+  >
+    Reset Filters
+  </button>
+</div>

@@ -32,6 +32,7 @@
 - Exposing the internal sheet column `id` (`_row_id`): it must never appear on the `Product` model, in any signal, or in any component/template. It is stripped during row→model mapping by the `DataMapping` service (`src/app/core/sheets/data-mapping.ts`) via the configurable `INTERNAL_FIELDS` list. To exclude a future internal column, add its sheet label to `INTERNAL_FIELDS` — nowhere else.
 - Hardcoding hex colors, font families, or spacing values in component SCSS — use the design tokens (`var(--token)`) / `.stoqr-*` classes from `src/styles/stoqr-theme.scss`.
 - `max-width` media queries. Styling is mobile-first: base = mobile, overrides via `min-width` only (768/1024/1440) using the `from()` mixin in `src/styles/_breakpoints.scss`.
+- Filter state or filtering logic in components. Filter STATE lives in `FilterService` (`src/app/core/filter/`); filtering is a pure function (`core/filter/product-filter.ts`); option lists + greying are surfaced by `ProductSearchStore`. Components only render and call setters.
 
 ## Self-Enforcing Contract
 After any core domain change, Claude must:

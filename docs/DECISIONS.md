@@ -112,3 +112,11 @@
 - Decision (failure states): initial-search failure reverts to the centered hero (`hasSearched=false`, no table — AC-09); refresh failure keeps the stale products + active state (table stays — AC-10). The trigger carries `isRefresh` through to the result so the subscribe can branch.
 - Decision: `retry()` re-runs the last query the same way (refresh vs initial, via a `lastRefresh` flag + the stored `searchTerm`); `dismissError()` clears the toast. The toast is a global overlay driven by `SheetsData.error()`.
 - Deviation (tech note): the toast exposes Angular **outputs** (`retry`/`dismiss`) instead of an `onRetry: Function` input — more idiomatic, still reusable.
+
+## 2026-06-11: US-08 — facet filter mechanism (Stock Status)
+
+- Decision (pipeline): `results (Active) → query match (searchResults) → facet filters → visibleProducts`. Facet filtering is a pure function `applyFilters` (`core/filter/product-filter.ts`); state lives in a dedicated `FilterService` (`core/filter/`); option lists + greying are computed in `ProductSearchStore`. No DI cycle (FilterService holds no data).
+- Decision (selection model): each facet stores the **selected values** (a set); **empty = "All" = no filter** and is not counted in "Filters (N)". The `<stoqr-filter-select>` dropdown (wraps PrimeNG `p-multiSelect`) adds an explicit **"All"** option that is mutually exclusive with the real options — selecting a real value clears All; selecting All clears the reals (user request). Selections persist across searches/refresh (value-based, independent of current options).
+- Decision (options/greying): Stock Status options are the 4 fixed variants (`core/stock-status.ts` `STOCK_VARIANTS`); an option is greyed/disabled when absent from the current `searchResults` (AC-06/07 pattern, reused by US-09/10).
+- Decision (refactor): the stock-status→variant resolver moved from `shared/ui/badge/stock-status.ts` to `core/stock-status.ts` (it is domain logic used by both the badge and the filter; keeps the core ← shared dependency direction correct).
+- Decision (panel): collapsible `FilterPanelComponent` (150ms ease, full-width mobile / 280px ≥768) holds the facets in the locked order Status → Category → Sub-category → Brand → toggles (US-13) → Reset.

@@ -138,6 +138,18 @@
   color: var(--color-ink-light);
 }
 
+.results__toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.filter-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
 @keyframes results-in {
   from {
     opacity: 0;

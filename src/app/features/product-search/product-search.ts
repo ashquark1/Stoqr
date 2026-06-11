@@ -12,8 +12,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Product } from '@core/models/product';
 import { ProductSearchStore } from '@core/search/product-search-store';
 import { SheetsData } from '@core/sheets/sheets-data';
+import { FilterService } from '@core/filter/filter-service';
+import { resolveStockVariant } from '@core/stock-status';
 import { Badge } from '@shared/ui/badge/badge';
-import { resolveStockVariant } from '@shared/ui/badge/stock-status';
+
+import { FilterPanel } from './filter-panel/filter-panel';
 import { DataTable, DataTableRow } from '@shared/ui/data-table/data-table';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
 import { LoadingOverlay } from '@shared/ui/loading-overlay/loading-overlay';
@@ -41,6 +44,7 @@ import { PRODUCT_COLUMNS, PRODUCT_FIELD_GROUPS } from './product-fields';
     LoadingOverlay,
     Badge,
     Toast,
+    FilterPanel,
   ],
   templateUrl: './product-search.html',
   styleUrl: './product-search.scss',
@@ -49,6 +53,7 @@ import { PRODUCT_COLUMNS, PRODUCT_FIELD_GROUPS } from './product-fields';
 export class ProductSearch {
   private readonly store = inject(SheetsData);
   private readonly search = inject(ProductSearchStore);
+  private readonly filters = inject(FilterService);
 
   protected readonly searchControl = new FormControl('', { nonNullable: true });
 
@@ -72,6 +77,15 @@ export class ProductSearch {
   protected readonly selectedProduct = signal<Product | null>(null);
   protected readonly modalOpen = computed(() => this.selectedProduct() !== null);
 
+  // Filter panel (US-08): toggle + active-filter count + empty-state copy.
+  protected readonly panelOpen = signal(false);
+  protected readonly activeFilterCount = this.filters.activeCount;
+  protected readonly emptyMessage = computed(() =>
+    this.search.hasActiveFilters()
+      ? 'No products match your search and filters.'
+      : 'No products match your search.',
+  );
+
   private readonly stockStatusTpl =
     viewChild.required<TemplateRef<unknown>>('stockStatusTpl');
   private readonly stockQtyTpl =
@@ -94,6 +108,10 @@ export class ProductSearch {
 
   protected onRefresh(): void {
     this.store.refresh();
+  }
+
+  protected togglePanel(): void {
+    this.panelOpen.update((open) => !open);
   }
 
   protected onRowSelect(row: DataTableRow): void {

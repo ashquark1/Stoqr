@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-import { resolveStockVariant, stockLabel } from './stock-status';
+import { resolveStockVariant, stockLabel } from '@core/stock-status';
 
 /**
  * Reusable stock-status badge. Takes the verbatim sheet `stockStatus` string and
