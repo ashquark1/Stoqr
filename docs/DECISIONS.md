@@ -120,3 +120,10 @@
 - Decision (options/greying): Stock Status options are the 4 fixed variants (`core/stock-status.ts` `STOCK_VARIANTS`); an option is greyed/disabled when absent from the current `searchResults` (AC-06/07 pattern, reused by US-09/10).
 - Decision (refactor): the stock-status→variant resolver moved from `shared/ui/badge/stock-status.ts` to `core/stock-status.ts` (it is domain logic used by both the badge and the filter; keeps the core ← shared dependency direction correct).
 - Decision (panel): collapsible `FilterPanelComponent` (150ms ease, full-width mobile / 280px ≥768) holds the facets in the locked order Status → Category → Sub-category → Brand → toggles (US-13) → Reset.
+
+## 2026-06-12: US-11 — last-updated freshness timestamp
+
+- Decision: `SheetsData` owns a `fetchedAt: Date | null` signal, set ONLY in the fetch success branch. A failed fetch (initial or refresh) never touches it, so AC-06 ("unchanged on failure") falls out structurally rather than via branching.
+- Decision (auto-update): relative wording ticks via an impure `RelativeTimePipe` (`shared/util/relative-time.ts`) that owns a single 60s interval and calls `markForCheck()`, cleared on destroy. Chosen over a global `now` signal-tick + pure pipe to keep the component free of timer wiring (one self-contained label).
+- Decision (formatting): pure `relativeTime(from, now)` (unit-testable, mirrors the `display-value` helper pattern); absolute tooltip via the built-in `DatePipe` + native `title` attribute — no one-off TooltipDirective (Q-G2).
+- Rejected: per-row `lastUpdated` column as the source (that is sheet data, not fetch freshness); a new tooltip library/directive (native title suffices).

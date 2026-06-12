@@ -7,6 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { Product } from '@core/models/product';
@@ -24,6 +25,7 @@ import { Logo } from '@shared/ui/logo/logo';
 import { Modal } from '@shared/ui/modal/modal';
 import { Toast } from '@shared/ui/toast/toast';
 import { displayValue } from '@shared/util/display-value';
+import { RelativeTimePipe } from '@shared/util/relative-time';
 
 import { PRODUCT_COLUMNS, PRODUCT_FIELD_GROUPS } from './product-fields';
 
@@ -45,6 +47,8 @@ import { PRODUCT_COLUMNS, PRODUCT_FIELD_GROUPS } from './product-fields';
     Badge,
     Toast,
     FilterPanel,
+    DatePipe,
+    RelativeTimePipe,
   ],
   templateUrl: './product-search.html',
   styleUrl: './product-search.scss',
@@ -63,6 +67,8 @@ export class ProductSearch {
   protected readonly loading = this.store.loading;
   protected readonly refreshing = this.store.refreshing;
   protected readonly error = this.store.error;
+  /** Time of the last successful sheet fetch — the freshness label (US-11). */
+  protected readonly fetchedAt = this.store.fetchedAt;
   protected readonly hasSearched = this.store.hasSearched;
   /** True once a search is active — drives hero ↔ active layout. */
   protected readonly isSearchActive = this.store.hasSearched;

@@ -143,6 +143,18 @@
   align-items: center;
   gap: var(--space-3);
   flex-wrap: wrap;
+
+  // The freshness label + Refresh button hug the right edge of the toolbar.
+  &--end {
+    justify-content: flex-end;
+  }
+}
+
+// Last-updated freshness label (US-11): muted, matches the result count.
+.results__updated {
+  font-size: var(--text-small);
+  color: var(--color-ink-light);
+  white-space: nowrap;
 }
 
 .filter-toggle svg {

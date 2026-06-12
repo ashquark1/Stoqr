@@ -22,7 +22,7 @@ A web frontend (Angular 21 SPA) for searching and viewing the stock of products.
 - **Forbidden:** incrementing/decrementing or writing stock back to the sheet; computing stock from any source other than the sheet.
 
 ### Data Source (Google Sheets) — cross-cutting
-- **Owns:** all communication with the single Google Sheet via `HttpClient`, and exposing the result as signals.
+- **Owns:** all communication with the single Google Sheet via `HttpClient`, and exposing the result as signals — including the **last-successful-fetch timestamp** (`fetchedAt` signal, stamped only on a successful GET; consumed by the UI's freshness label, formatted by the shared `relative-time` pipe).
 - **Does NOT own:** domain shaping beyond row→model mapping, or UI concerns.
 - **Code lives in:** `src/app/core/sheets/sheets-data.ts` (the `HttpClient` GET, RxJS debounce/cancellation, signal state — including the `loading` vs `refreshing` fetch states). `gviz-parse.ts` unwraps the JSONP envelope only; `data-mapping.ts` (the `DataMapping` service) owns row→model mapping + internal-field stripping; raw response types in `gviz-types.ts`. The endpoint URL lives in `src/environments/`.
 - **The rule:** this is the ONLY place `HttpClient` is used. Read-only in V1.

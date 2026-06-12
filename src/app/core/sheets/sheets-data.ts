@@ -46,6 +46,8 @@ export class SheetsData {
   /** True once a search has been triggered — drives the centered→results view. */
   private readonly _hasSearched = signal(false);
   private readonly _searchTerm = signal('');
+  /** When the sheet was last fetched successfully — drives the freshness label (US-11). */
+  private readonly _fetchedAt = signal<Date | null>(null);
 
   readonly products = this._products.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -53,6 +55,7 @@ export class SheetsData {
   readonly error = this._error.asReadonly();
   readonly hasSearched = this._hasSearched.asReadonly();
   readonly searchTerm = this._searchTerm.asReadonly();
+  readonly fetchedAt = this._fetchedAt.asReadonly();
 
   /**
    * The product list the UI renders: Active products only (AC-10). The Active
@@ -127,6 +130,9 @@ export class SheetsData {
         } else {
           this._products.set(products);
           this._error.set(null);
+          // Stamp the successful fetch time (US-11 AC-02/05). Only the success
+          // branch touches this, so a failed fetch leaves it unchanged (AC-06).
+          this._fetchedAt.set(new Date());
         }
       });
   }

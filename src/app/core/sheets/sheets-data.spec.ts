@@ -236,6 +236,53 @@ describe('SheetsData', () => {
     expect(service.isEmpty()).toBe(true);
     expect(service.results()).toEqual([]);
   });
+
+  // US-11 AC-07: no fetch yet -> no timestamp.
+  it('has no fetchedAt before the first fetch', () => {
+    expect(service.fetchedAt()).toBeNull();
+  });
+
+  // US-11 AC-02/05: a successful fetch stamps the time, and a later successful
+  // refresh advances it.
+  it('advances fetchedAt on each successful fetch', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'));
+    service.searchNow('oximeter');
+    httpMock.expectOne(URL).flush(EMPTY_RAW);
+    const first = service.fetchedAt();
+    expect(first).toEqual(new Date('2026-06-12T12:00:00Z'));
+
+    vi.setSystemTime(new Date('2026-06-12T12:05:00Z'));
+    service.refresh();
+    httpMock.expectOne(URL).flush(EMPTY_RAW);
+    expect(service.fetchedAt()).toEqual(new Date('2026-06-12T12:05:00Z'));
+    expect(service.fetchedAt()).not.toEqual(first);
+  });
+
+  // US-11 AC-06: a failed refresh must NOT move the timestamp.
+  it('leaves fetchedAt unchanged when a refresh fails', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'));
+    service.searchNow('oximeter');
+    httpMock.expectOne(URL).flush(EMPTY_RAW);
+    const stamped = service.fetchedAt();
+
+    vi.setSystemTime(new Date('2026-06-12T12:05:00Z'));
+    service.refresh();
+    httpMock
+      .expectOne(URL)
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    expect(service.fetchedAt()).toBe(stamped);
+  });
+
+  // US-11 AC-06: an initial failure never stamps a time.
+  it('leaves fetchedAt null when the initial fetch fails', () => {
+    service.searchNow('oximeter');
+    httpMock
+      .expectOne(URL)
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    expect(service.fetchedAt()).toBeNull();
+  });
 });
 
 /** Minimal gviz response with just the columns the Active-filter test needs. */
