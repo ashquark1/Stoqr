@@ -11,6 +11,8 @@ interface ProductField {
   readonly cellType: CellType;
   /** Render this field as a stock-status badge (table + modal). */
   readonly badge?: boolean;
+  /** Render this field as a product-status badge (table + modal — US-13). */
+  readonly statusBadge?: boolean;
 }
 
 /**
@@ -26,7 +28,7 @@ const PRODUCT_FIELDS: readonly ProductField[] = [
   { key: 'sku', label: 'SKU', group: 'product', cellType: 'mono' },
   { key: 'size', label: 'Size', group: 'product', cellType: 'text' },
   { key: 'color', label: 'Color', group: 'product', cellType: 'text' },
-  { key: 'status', label: 'Status', group: 'product', cellType: 'text' },
+  { key: 'status', label: 'Status', group: 'product', cellType: 'text', statusBadge: true },
   // Stock Info
   { key: 'stockQty', label: 'Stock Qty', group: 'stock', cellType: 'number' },
   { key: 'lowStockThreshold', label: 'Low Stock Threshold', group: 'stock', cellType: 'number' },
@@ -68,5 +70,6 @@ export const PRODUCT_FIELD_GROUPS: readonly FieldGroup<Product>[] = (
     label: f.label,
     mono: f.cellType === 'mono',
     badge: f.badge ?? false,
+    statusBadge: f.statusBadge ?? false,
   })),
 }));

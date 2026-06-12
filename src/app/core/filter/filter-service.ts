@@ -1,5 +1,7 @@
 import { Injectable, Signal, computed, signal } from '@angular/core';
 
+import { StatusToggles } from '@core/product-status';
+
 import { FACET_KEYS, FacetKey, SelectedFilters } from './product-filter';
 
 /**
@@ -22,6 +24,37 @@ export class FilterService {
     subCategory: signal<ReadonlySet<string>>(new Set()),
     brand: signal<ReadonlySet<string>>(new Set()),
   };
+
+  /**
+   * Reveal toggles for hidden product statuses (US-13). Both default OFF — only
+   * Active is shown — and are reset on every new search/refresh (AC-12). Distinct
+   * from the facet selections above: they relax the default hide rather than
+   * narrow, so they are NOT counted in `activeCount`.
+   */
+  private readonly _showInactive = signal(false);
+  private readonly _showDiscontinued = signal(false);
+  readonly showInactive = this._showInactive.asReadonly();
+  readonly showDiscontinued = this._showDiscontinued.asReadonly();
+
+  /** The two toggles bundled for `applyStatusVisibility`. */
+  readonly statusToggles = computed<StatusToggles>(() => ({
+    showInactive: this._showInactive(),
+    showDiscontinued: this._showDiscontinued(),
+  }));
+
+  setShowInactive(show: boolean): void {
+    this._showInactive.set(show);
+  }
+
+  setShowDiscontinued(show: boolean): void {
+    this._showDiscontinued.set(show);
+  }
+
+  /** Reset both reveal toggles to off (on a new search/refresh — AC-12). */
+  resetStatusToggles(): void {
+    this._showInactive.set(false);
+    this._showDiscontinued.set(false);
+  }
 
   /** The selected-values signal for a facet (read-only view). */
   selectedFor(facet: FacetKey): Signal<ReadonlySet<string>> {
@@ -46,10 +79,11 @@ export class FilterService {
     () => FACET_KEYS.filter((f) => this.selected[f]().size > 0).length,
   );
 
-  /** Clear every facet back to "All". */
+  /** Clear every facet back to "All" and turn off the reveal toggles. */
   reset(): void {
     for (const f of FACET_KEYS) {
       this.selected[f].set(new Set());
     }
+    this.resetStatusToggles();
   }
 }

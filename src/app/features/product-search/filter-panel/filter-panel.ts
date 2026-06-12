@@ -3,16 +3,17 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FilterService } from '@core/filter/filter-service';
 import { ProductSearchStore } from '@core/search/product-search-store';
 import { FilterSelect } from '@shared/ui/filter-select/filter-select';
+import { Toggle } from '@shared/ui/toggle/toggle';
 
 /**
- * Collapsible filter panel. Renders one dropdown per facet (Stock Status here;
- * Category/Sub-category/Brand and the Show-Inactive/Discontinued toggles land in
- * US-09/10/13) plus Reset Filters. Reads option lists from the search store and
- * writes selections to the FilterService (single source of truth).
+ * Collapsible filter panel. Renders one dropdown per facet (Stock Status,
+ * Category, Sub-category, Brand), the Show-Inactive/Discontinued reveal toggles
+ * (US-13), and Reset Filters. Reads option lists + toggle state from the search
+ * store and writes selections/toggles to the FilterService (single source of truth).
  */
 @Component({
   selector: 'app-filter-panel',
-  imports: [FilterSelect],
+  imports: [FilterSelect, Toggle],
   templateUrl: './filter-panel.html',
   styleUrl: './filter-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +30,8 @@ export class FilterPanel {
   protected readonly subCategorySelected = this.store.subCategorySelected;
   protected readonly brandOptions = this.store.brandOptions;
   protected readonly brandSelected = this.store.brandSelected;
+  protected readonly showInactive = this.store.showInactive;
+  protected readonly showDiscontinued = this.store.showDiscontinued;
 
   protected onStatus(values: string[]): void {
     this.filters.setSelected('status', values);
@@ -44,6 +47,14 @@ export class FilterPanel {
 
   protected onBrand(values: string[]): void {
     this.filters.setSelected('brand', values);
+  }
+
+  protected onShowInactive(show: boolean): void {
+    this.filters.setShowInactive(show);
+  }
+
+  protected onShowDiscontinued(show: boolean): void {
+    this.filters.setShowDiscontinued(show);
   }
 
   protected reset(): void {

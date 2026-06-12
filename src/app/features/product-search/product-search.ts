@@ -16,6 +16,7 @@ import { SheetsData } from '@core/sheets/sheets-data';
 import { FilterService } from '@core/filter/filter-service';
 import { resolveStockVariant } from '@core/stock-status';
 import { Badge } from '@shared/ui/badge/badge';
+import { StatusBadge } from '@shared/ui/status-badge/status-badge';
 
 import { FilterPanel } from './filter-panel/filter-panel';
 import { DataTable, DataTableRow } from '@shared/ui/data-table/data-table';
@@ -45,6 +46,7 @@ import { PRODUCT_COLUMNS, PRODUCT_FIELD_GROUPS } from './product-fields';
     EmptyState,
     LoadingOverlay,
     Badge,
+    StatusBadge,
     Toast,
     FilterPanel,
     DatePipe,
@@ -96,11 +98,14 @@ export class ProductSearch {
     viewChild.required<TemplateRef<unknown>>('stockStatusTpl');
   private readonly stockQtyTpl =
     viewChild.required<TemplateRef<unknown>>('stockQtyTpl');
+  private readonly statusTpl =
+    viewChild.required<TemplateRef<unknown>>('statusTpl');
 
   protected readonly cellTemplates = computed<Record<string, TemplateRef<unknown>>>(
     () => ({
       stockStatus: this.stockStatusTpl(),
       stockQty: this.stockQtyTpl(),
+      status: this.statusTpl(),
     }),
   );
 

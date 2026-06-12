@@ -216,4 +216,94 @@ describe('ProductSearchStore', () => {
     filters.setSelected('brand', ['BPL']);
     expect(store.visibleProducts().map((p) => p.productName)).toEqual(['item 2']);
   });
+
+  // ----- US-13: status visibility -----
+
+  it('shows only Active products by default; toggles reveal the rest (AC-01/02/03/08/09)', () => {
+    const filters = TestBed.inject(FilterService);
+    sheets.searchNow('item');
+    httpMock.expectOne(URL).flush(
+      rawWith([
+        { name: 'item A', color: 'x', status: 'Active' },
+        { name: 'item B', color: 'x', status: 'Inactive' },
+        { name: 'item C', color: 'x', status: 'Discontinued' },
+      ]),
+    );
+    // Default: Active only.
+    expect(store.visibleProducts().map((p) => p.productName)).toEqual(['item A']);
+
+    filters.setShowInactive(true);
+    expect(store.visibleProducts().map((p) => p.productName)).toEqual([
+      'item A',
+      'item B',
+    ]);
+
+    filters.setShowDiscontinued(true);
+    expect(store.visibleProducts().map((p) => p.productName)).toEqual([
+      'item A',
+      'item B',
+      'item C',
+    ]);
+  });
+
+  it('excludes hidden products from facet options and the count (AC-06/07)', () => {
+    const filters = TestBed.inject(FilterService);
+    sheets.searchNow('item');
+    httpMock.expectOne(URL).flush(
+      rawCatStatus([
+        { name: 'item A', category: 'Devices', status: 'Active' },
+        { name: 'item B', category: 'Legacy', status: 'Discontinued' },
+      ]),
+    );
+    // Discontinued "Legacy" must not appear in options or the count by default.
+    expect(store.categoryOptions().map((o) => o.value)).toEqual(['Devices']);
+    expect(store.visibleProducts()).toHaveLength(1);
+
+    filters.setShowDiscontinued(true);
+    expect(store.categoryOptions().map((o) => o.value)).toEqual([
+      'Devices',
+      'Legacy',
+    ]);
+    expect(store.visibleProducts()).toHaveLength(2);
+  });
+
+  it('resets the reveal toggles on the next successful fetch (AC-12)', () => {
+    const filters = TestBed.inject(FilterService);
+    sheets.searchNow('item');
+    httpMock
+      .expectOne(URL)
+      .flush(rawWith([{ name: 'item A', color: 'x', status: 'Active' }]));
+
+    filters.setShowInactive(true);
+    expect(filters.showInactive()).toBe(true);
+
+    sheets.refresh();
+    httpMock
+      .expectOne(URL)
+      .flush(rawWith([{ name: 'item A', color: 'x', status: 'Active' }]));
+    TestBed.tick();
+    expect(filters.showInactive()).toBe(false);
+  });
 });
+
+/** Minimal gviz response with product name, category and product status. */
+function rawCatStatus(
+  rows: ReadonlyArray<{ name: string; category: string; status: string }>,
+): string {
+  const table = {
+    cols: [
+      { id: 'A', label: 'id', type: 'number' },
+      { id: 'B', label: 'product name', type: 'string' },
+      { id: 'C', label: 'category', type: 'string' },
+      { id: 'D', label: 'status', type: 'string' },
+    ],
+    rows: rows.map((r, i) => ({
+      c: [{ v: i + 1 }, { v: r.name }, { v: r.category }, { v: r.status }],
+    })),
+  };
+  return (
+    '/*O_o*/\ngoogle.visualization.Query.setResponse(' +
+    JSON.stringify({ version: '0.6', reqId: '0', status: 'ok', table }) +
+    ');'
+  );
+}

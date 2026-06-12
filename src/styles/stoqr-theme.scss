@@ -340,6 +340,40 @@ a {
 
 
 // ============================================================
+// COMPONENT: Product Status Badge (US-13)
+// A distinct family from the stock badge: outlined, no status dot, so an
+// Inactive/Discontinued row reads as exceptional rather than as stock state.
+// ============================================================
+
+.stoqr-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+
+  // Inactive: neutral grey, consistent with the Unknown stock badge hue.
+  &--inactive {
+    background: var(--color-unknown-bg);
+    border-color: var(--color-unknown);
+    color: #4A5E55;
+  }
+
+  // Discontinued: muted red — outlined (not filled like Out of Stock), so it
+  // is distinct from and less prominent than the Out-of-Stock badge.
+  &--discontinued {
+    background: transparent;
+    border-color: var(--color-error-border);
+    color: var(--color-error);
+  }
+}
+
+
+// ============================================================
 // COMPONENT: Buttons
 // ============================================================
 

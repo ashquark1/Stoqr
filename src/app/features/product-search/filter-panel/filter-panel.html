@@ -28,6 +28,21 @@
     (selectedChange)="onBrand($event)"
   />
 
+  <hr class="filter-panel__divider" />
+
+  <stoqr-toggle
+    label="Show Inactive Products"
+    [checked]="showInactive()"
+    (checkedChange)="onShowInactive($event)"
+  />
+  <stoqr-toggle
+    label="Show Discontinued Products"
+    [checked]="showDiscontinued()"
+    (checkedChange)="onShowDiscontinued($event)"
+  />
+
+  <hr class="filter-panel__divider" />
+
   <button
     type="button"
     class="stoqr-btn stoqr-btn--ghost filter-panel__reset"

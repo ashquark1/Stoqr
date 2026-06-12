@@ -9,6 +9,8 @@ export interface FieldDef<T = unknown> {
   readonly mono?: boolean;
   /** Render the value as a stock-status badge instead of plain text. */
   readonly badge?: boolean;
+  /** Render the value as a product-status badge (Inactive/Discontinued — US-13). */
+  readonly statusBadge?: boolean;
 }
 
 /** A titled group of fields, used to lay out a read-only detail modal. */

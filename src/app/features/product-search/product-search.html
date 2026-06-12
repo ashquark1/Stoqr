@@ -128,6 +128,8 @@
               >
                 @if (field.badge) {
                   <stoqr-badge [status]="p.stockStatus" />
+                } @else if (field.statusBadge) {
+                  <stoqr-status-badge [status]="p.status" />
                 } @else {
                   {{ display(p[field.key]) }}
                 }
@@ -146,4 +148,7 @@
 </ng-template>
 <ng-template #stockQtyTpl let-value let-row="row">
   <span [class]="qtyClass(row)">{{ display(value) }}</span>
+</ng-template>
+<ng-template #statusTpl let-value>
+  <stoqr-status-badge [status]="value" />
 </ng-template>
