@@ -92,18 +92,21 @@
 }
 .stoqr-search__input {
   min-width: 0;
+  height: 100%; // fill the 44/52px bar so the whole height is tappable (AC-11)
   text-overflow: ellipsis;
 }
 
 // ----- Icon buttons (Search + Refresh): icon-only on mobile, +label ≥768 -----
 .icon-btn {
   flex-shrink: 0;
+  // Square when collapsed to icon-only (mobile); widens for the label ≥768.
+  width: 44px;
   height: 44px;
-  padding: 0 var(--space-3);
+  padding: 0;
 
   &--lg {
+    width: 52px;
     height: 52px;
-    padding: 0 var(--space-4);
   }
 
   svg {
@@ -123,43 +126,51 @@
   padding-bottom: var(--space-8);
   animation: results-in 0.3s ease;
 
+  // A regrouping grid, switched at the same breakpoint where the buttons gain
+  // their text labels. Mobile (icon-only buttons): a 2×2 grid — Filters /
+  // Refresh on the top row, count / Last updated below. From tablet (buttons
+  // show text): a single row — Filters + count on the left, Last updated +
+  // Refresh on the right edge.
   &__toolbar {
-    display: flex;
+    display: grid;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
     margin-bottom: var(--space-4);
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "filters refresh"
+      "count   updated";
+
+    @include bp.from(tablet) {
+      grid-template-columns: auto auto 1fr auto auto;
+      grid-template-areas: "filters count . updated refresh";
+    }
   }
+}
+
+.filter-toggle {
+  grid-area: filters;
+  justify-self: start;
+}
+.stoqr-refresh {
+  grid-area: refresh;
+  justify-self: end;
 }
 
 .stoqr-results__count {
+  grid-area: count;
+  justify-self: start;
   font-size: var(--text-small);
   color: var(--color-ink-light);
-}
-
-.results__toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-
-  // The freshness label + Refresh button hug the right edge of the toolbar.
-  &--end {
-    justify-content: flex-end;
-  }
 }
 
 // Last-updated freshness label (US-11): muted, matches the result count.
 .results__updated {
+  grid-area: updated;
+  justify-self: end;
   font-size: var(--text-small);
   color: var(--color-ink-light);
   white-space: nowrap;
-}
-
-.filter-toggle svg {
-  width: 16px;
-  height: 16px;
 }
 
 @keyframes results-in {
@@ -179,6 +190,7 @@
     display: inline;
   }
   .icon-btn {
+    width: auto; // grow to fit icon + label once the text shows
     padding: 0 var(--space-5);
     &--lg {
       padding: 0 var(--space-6);

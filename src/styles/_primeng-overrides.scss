@@ -1,3 +1,5 @@
+@use 'breakpoints' as bp;
+
 // ============================================================
 // PrimeNG brand overrides (global, UNLAYERED)
 // ============================================================
@@ -13,7 +15,7 @@
 .stoqr-data-table {
   .p-datatable-table-container {
     border: var(--border-thin);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-control);
     background: var(--color-white);
   }
 
@@ -46,27 +48,125 @@
 }
 
 // --- Pagination: match .stoqr-pagination spec ---
+// Same two-row layout at every width — the current-page report and the page-size
+// selector share the top line; the page buttons sit centered below. Control
+// sizes are consistent across all breakpoints (no responsive resizing).
 .p-paginator {
   background: transparent;
   padding: var(--space-3) 0;
   color: var(--color-ink-light);
   font-size: var(--text-label);
 
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  row-gap: var(--space-2);
+
   .p-paginator-current {
+    order: 0;
     color: var(--color-ink-light);
     font-size: var(--text-label);
+  }
+  // Page-size selector: right of the report on the top line.
+  .p-paginator-rpp-dropdown {
+    order: 1;
+    margin-left: auto;
+    min-height: 44px; // match the page-button height at every width
+    border-radius: var(--radius-control);
+
+    // Vertically centre the value within the (taller) control box via flexbox
+    // alignment on the enclosing box, rather than line-height/padding tweaks.
+    display: inline-flex;
+    align-items: center;
+
+    .p-select-label {
+      text-align: center;
+    }
+  }
+  // Flexbox line break: pushes the page buttons onto the next line.
+  &::after {
+    content: '';
+    order: 2;
+    flex-basis: 100%;
+    height: 0;
+  }
+  .p-paginator-first,
+  .p-paginator-prev,
+  .p-paginator-pages,
+  .p-paginator-next,
+  .p-paginator-last {
+    order: 3;
+  }
+
+  // 44px square page/nav buttons (active page is a circle) at every width.
+  // The page-size selector keeps its natural size at every width.
+  .p-paginator-first,
+  .p-paginator-prev,
+  .p-paginator-next,
+  .p-paginator-last,
+  .p-paginator-page {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  // Larger than tablet: one inline row — report at the left, page buttons in the
+  // TRUE center, page-size selector at the right. A grid with equal 1fr side
+  // columns centres the buttons on the paginator's midpoint regardless of the
+  // side widths (pixel-perfect), with the report/selector justified into the
+  // outer columns. Columns map 1:1 to the DOM order
+  // (report | first prev pages next last | selector).
+  @include bp.from(desktop) {
+    display: grid;
+    grid-template-columns: 1fr repeat(5, auto) 1fr;
+    align-items: center;
+
+    // Clear the mobile flex order so items auto-place in DOM order.
+    .p-paginator-current,
+    .p-paginator-rpp-dropdown,
+    .p-paginator-first,
+    .p-paginator-prev,
+    .p-paginator-pages,
+    .p-paginator-next,
+    .p-paginator-last {
+      order: 0;
+    }
+    .p-paginator-current {
+      justify-self: start;
+    }
+    .p-paginator-rpp-dropdown {
+      justify-self: end;
+      margin-left: 0; // override the mobile margin-left:auto
+    }
+    &::after {
+      content: none; // drop the mobile line-break so it isn't a grid cell
+    }
   }
 }
 
 // --- Dialog: match .stoqr-modal spec (rendered in a body overlay) ---
+// Mobile-first: full-screen on mobile; a centered 520px card from tablet up (AC-08).
 .stoqr-modal-dialog.p-dialog {
-  // Fixed modal dimensions per the brand spec (no spacing token for these).
-  width: 520px;
-  max-width: 92vw;
-  border: var(--border-thin);
-  border-radius: var(--radius-2xl);
+  // Mobile base: fill the viewport, no frame.
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
   background: var(--color-white);
-  box-shadow: var(--shadow-modal);
+  overflow: hidden; // clip the header/content to the rounded corners (tablet+)
+
+  @include bp.from(tablet) {
+    width: 520px;
+    height: auto;
+    max-width: 92vw;
+    max-height: 90vh;
+    border: var(--border-thin);
+    border-radius: var(--radius-control);
+    box-shadow: var(--shadow-modal);
+  }
 
   .p-dialog-header {
     background: var(--color-paper);
@@ -87,8 +187,14 @@
 .stoqr-multiselect.p-multiselect {
   width: 100%;
   border: var(--border-input);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   background: var(--color-white);
+  // Tap target ≥44px on mobile (AC-11); compact from tablet up.
+  min-height: 44px;
+
+  @include bp.from(tablet) {
+    min-height: 0;
+  }
 
   &:not(.p-disabled):hover,
   &.p-focus {
@@ -99,7 +205,7 @@
 // Overlay panel (rendered in a body overlay, so styled globally + unlayered).
 .p-multiselect-overlay {
   border: var(--border-thin);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   background: var(--color-white);
   box-shadow: var(--shadow-search);
   font-size: var(--text-body);

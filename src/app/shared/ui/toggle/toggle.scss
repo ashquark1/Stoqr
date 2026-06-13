@@ -1,3 +1,5 @@
+@use 'breakpoints' as bp;
+
 .stoqr-toggle {
   display: flex;
   align-items: center;
@@ -5,6 +7,12 @@
   cursor: pointer;
   font-size: var(--text-small);
   color: var(--color-ink);
+  // Tap target ≥44px on mobile (AC-11); relax to content height from tablet up.
+  min-height: 44px;
+
+  @include bp.from(tablet) {
+    min-height: 0;
+  }
 }
 
 // Native checkbox: visually hidden but focusable; the label click toggles it.

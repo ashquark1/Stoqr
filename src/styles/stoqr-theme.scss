@@ -84,6 +84,11 @@
   --radius-2xl: 12px;
   --radius-pill: 100px;
 
+  // Shared roundedness for every visibly-bordered rectangular surface (search
+  // bar, buttons, table, panel, dropdowns, toast, modal). One source of truth —
+  // change this alias to restyle all of them at once. Pills/circles opt out.
+  --radius-control: var(--radius-xl);
+
   --border-thin:  0.5px solid var(--color-fog);
   --border-input: 1.5px solid var(--color-fog);
 
@@ -231,7 +236,7 @@ a {
   align-items: center;
   background: var(--color-white);
   border: var(--border-input);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-control);
   padding: 0 var(--space-4);
   gap: var(--space-3);
   box-shadow: var(--shadow-search);
@@ -383,7 +388,7 @@ a {
   justify-content: center;
   gap: var(--space-2);
   padding: 8px var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 500;
@@ -442,7 +447,7 @@ a {
 .stoqr-table-wrap {
   overflow-x: auto;
   border: var(--border-thin);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-control);
   background: var(--color-white);
   width: 100%;
 }
@@ -522,7 +527,7 @@ a {
 .stoqr-modal {
   background: var(--color-white);
   border: var(--border-thin);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-control);
   overflow: hidden;
   max-width: 520px;
   width: 100%;
@@ -637,7 +642,7 @@ a {
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-3) 14px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-control);
   border: 0.5px solid;
   font-size: 12px;
 

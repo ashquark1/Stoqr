@@ -24,7 +24,7 @@
   margin-bottom: var(--space-4);
   background: var(--color-white);
   border: var(--border-thin);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-control);
   width: 100%; // full width on mobile (AC-14)
 
   @include bp.from(tablet) {
@@ -42,4 +42,5 @@
 
 .filter-panel__reset {
   align-self: flex-start;
+  min-height: 44px; // tap target (AC-11)
 }

@@ -28,6 +28,7 @@
 - Manual `.subscribe()` in components to "just get the data" — use `async` pipe or `toSignal()`.
 - Adding `if (specificValue)` special-cases to make one row/product behave differently — fix the model or mapping instead.
 - Copy-pasting a component/service and tweaking it instead of extracting a shared piece (design deterioration — Q-G3).
+- Reuse over duplication (Q-G3): when new UI shares the same element, behaviour, and a similar function as an existing component or class, REUSE that component/class rather than re-implementing or styling a one-off (e.g. every icon-only button uses the shared `.icon-btn`; vendor widgets go through `shared/ui/` wrappers; shared roundedness uses `--radius-control`). If reuse needs a small variation, extend the shared piece with a modifier/input — don't fork it. Always propose the reuse before adding parallel code.
 - Suppressing TypeScript or template errors instead of resolving them.
 - Exposing the internal sheet column `id` (`_row_id`): it must never appear on the `Product` model, in any signal, or in any component/template. It is stripped during row→model mapping by the `DataMapping` service (`src/app/core/sheets/data-mapping.ts`) via the configurable `INTERNAL_FIELDS` list. To exclude a future internal column, add its sheet label to `INTERNAL_FIELDS` — nowhere else.
 - Hardcoding hex colors, font families, or spacing values in component SCSS — use the design tokens (`var(--token)`) / `.stoqr-*` classes from `src/styles/stoqr-theme.scss`.
