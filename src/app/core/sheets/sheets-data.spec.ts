@@ -283,6 +283,28 @@ describe('SheetsData', () => {
       .flush('boom', { status: 500, statusText: 'Server Error' });
     expect(service.fetchedAt()).toBeNull();
   });
+
+  // US-14: searchSerial ticks on a new search (so sort can reset)...
+  it('increments searchSerial on a new search, but not on refresh', () => {
+    expect(service.searchSerial()).toBe(0);
+
+    service.searchNow('oximeter');
+    httpMock.expectOne(URL).flush(EMPTY_RAW);
+    expect(service.searchSerial()).toBe(1);
+
+    // Refresh keeps the same session → no tick (sort must persist on refresh).
+    service.refresh();
+    httpMock.expectOne(URL).flush(EMPTY_RAW);
+    expect(service.searchSerial()).toBe(1);
+  });
+
+  it('ticks searchSerial on a debounced typing-triggered new search', () => {
+    vi.useFakeTimers();
+    service.onSearchInput('oximeter');
+    vi.advanceTimersByTime(300);
+    httpMock.expectOne(URL).flush(EMPTY_RAW);
+    expect(service.searchSerial()).toBe(1);
+  });
 });
 
 /** Minimal gviz response with just the columns the Active-filter test needs. */

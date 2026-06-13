@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { environment } from '@env/environment';
 import { FilterService } from '@core/filter/filter-service';
 import { SheetsData } from '@core/sheets/sheets-data';
+import { SortService } from '@core/sort/sort-service';
 
 import { ProductSearchStore } from './product-search-store';
 import { SECONDARY_ONLY_MESSAGE } from './search-validation';
@@ -284,7 +285,103 @@ describe('ProductSearchStore', () => {
     TestBed.tick();
     expect(filters.showInactive()).toBe(false);
   });
+
+  // ----- US-14: sort -----
+
+  it('applies the sort to the filtered results, nulls last (AC-01/13)', () => {
+    const sorting = TestBed.inject(SortService);
+    sheets.searchNow('item');
+    httpMock.expectOne(URL).flush(
+      rawWithQty([
+        { name: 'item a', qty: 30 },
+        { name: 'item b', qty: 5 },
+        { name: 'item c', qty: null },
+      ]),
+    );
+    // Default: sheet order.
+    expect(store.sortedProducts().map((p) => p.productName)).toEqual([
+      'item a',
+      'item b',
+      'item c',
+    ]);
+
+    sorting.cycle('stockQty'); // ascending
+    expect(store.sortedProducts().map((p) => p.productName)).toEqual([
+      'item b',
+      'item a',
+      'item c',
+    ]);
+    // The count is the unsorted filtered set — unaffected by sort.
+    expect(store.visibleProducts()).toHaveLength(3);
+  });
+
+  it('keeps the sort across a refresh (AC-11)', () => {
+    const sorting = TestBed.inject(SortService);
+    const rows = [
+      { name: 'item a', qty: 30 },
+      { name: 'item b', qty: 5 },
+    ];
+    sheets.searchNow('item');
+    httpMock.expectOne(URL).flush(rawWithQty(rows));
+    TestBed.tick(); // flush the new-search reset effect, as it would in the app
+    sorting.cycle('stockQty');
+    expect(store.sortedProducts().map((p) => p.productName)).toEqual([
+      'item b',
+      'item a',
+    ]);
+
+    sheets.refresh();
+    httpMock.expectOne(URL).flush(rawWithQty(rows));
+    TestBed.tick();
+    expect(sorting.sort()).not.toBeNull();
+    expect(store.sortedProducts().map((p) => p.productName)).toEqual([
+      'item b',
+      'item a',
+    ]);
+  });
+
+  it('resets the sort on a new search (AC-12)', () => {
+    const sorting = TestBed.inject(SortService);
+    sheets.searchNow('item');
+    httpMock.expectOne(URL).flush(rawWithQty([{ name: 'a', qty: 5 }]));
+    sorting.cycle('stockQty');
+    expect(sorting.sort()).not.toBeNull();
+
+    // A new search session (clear, then search again) must clear the sort.
+    sheets.onSearchInput('');
+    sheets.searchNow('other');
+    httpMock.expectOne(URL).flush(rawWithQty([{ name: 'x', qty: 1 }]));
+    TestBed.tick();
+    expect(sorting.sort()).toBeNull();
+  });
 });
+
+/** Minimal gviz response with product name and numeric stock qty. */
+function rawWithQty(
+  rows: ReadonlyArray<{ name: string; qty: number | null }>,
+): string {
+  const table = {
+    cols: [
+      { id: 'A', label: 'id', type: 'number' },
+      { id: 'B', label: 'product name', type: 'string' },
+      { id: 'C', label: 'stock qty', type: 'number' },
+      { id: 'D', label: 'status', type: 'string' },
+    ],
+    rows: rows.map((r, i) => ({
+      c: [
+        { v: i + 1 },
+        { v: r.name },
+        r.qty === null ? null : { v: r.qty },
+        { v: 'Active' },
+      ],
+    })),
+  };
+  return (
+    '/*O_o*/\ngoogle.visualization.Query.setResponse(' +
+    JSON.stringify({ version: '0.6', reqId: '0', status: 'ok', table }) +
+    ');'
+  );
+}
 
 /** Minimal gviz response with product name, category and product status. */
 function rawCatStatus(

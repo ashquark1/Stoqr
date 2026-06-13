@@ -11,6 +11,8 @@ import {
 import { Product } from '@core/models/product';
 import { applyStatusVisibility } from '@core/product-status';
 import { SheetsData } from '@core/sheets/sheets-data';
+import { sortProducts } from '@core/sort/product-sort';
+import { SortService } from '@core/sort/sort-service';
 import { STOCK_VARIANTS, resolveStockVariant } from '@core/stock-status';
 
 import { filterProducts } from './product-matcher';
@@ -27,6 +29,7 @@ export class ProductSearchStore {
   private readonly sheets = inject(SheetsData);
   private readonly validation = inject(SearchValidation);
   private readonly filters = inject(FilterService);
+  private readonly sorting = inject(SortService);
 
   constructor() {
     // US-13 AC-12: the reveal toggles default off and reset on every new
@@ -37,6 +40,14 @@ export class ProductSearchStore {
     effect(() => {
       this.sheets.fetchedAt();
       this.filters.resetStatusToggles();
+    });
+
+    // US-14 AC-11/12: sort persists across a refresh but resets on a NEW search.
+    // searchSerial ticks only on a new search session start (not on refresh),
+    // so this resets the sort exactly then.
+    effect(() => {
+      this.sheets.searchSerial();
+      this.sorting.reset();
     });
   }
 
@@ -66,10 +77,18 @@ export class ProductSearchStore {
       : filterProducts(this.statusVisible(), this.sheets.searchTerm()),
   );
 
-  /** Final list shown in the table: search results narrowed by facet filters. */
+  /** Search results narrowed by facet filters (before sort). Drives the count. */
   readonly visibleProducts = computed<readonly Product[]>(() =>
     applyFilters(this.searchResults(), this.filters.selectedFilters()),
   );
+
+  /** The final ordered list the table renders: filtered results, then sorted (US-14). */
+  readonly sortedProducts = computed<readonly Product[]>(() =>
+    sortProducts(this.visibleProducts(), this.sorting.sort()),
+  );
+
+  /** Current sort state (null = sheet order) — surfaced for the table indicators. */
+  readonly sort = this.sorting.sort;
 
   /** Whether any facet filter is currently narrowing results. */
   readonly hasActiveFilters = computed(() => this.filters.activeCount() > 0);

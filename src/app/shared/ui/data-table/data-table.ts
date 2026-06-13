@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { TableModule } from 'primeng/table';
 
+import { SortState } from '@core/sort/product-sort';
 import { ColumnDef } from '@shared/models/column-def';
 import { displayValue } from '@shared/util/display-value';
 
@@ -39,8 +40,12 @@ export class DataTable {
   readonly pageSizeOptions = input<readonly number[]>([10, 25, 50]);
   /** Optional per-column custom cell templates, keyed by column key. */
   readonly cellTemplates = input<Record<string, TemplateRef<unknown>>>({});
+  /** Current sort, or null for sheet order (US-14). Drives header indicators. */
+  readonly sort = input<SortState | null>(null);
 
   readonly rowSelect = output<DataTableRow>();
+  /** A sortable header was clicked — emits the column key for the store to cycle. */
+  readonly sortChange = output<string>();
 
   protected display(value: unknown): string {
     return displayValue(value as string | number | null | undefined);
@@ -61,5 +66,24 @@ export class DataTable {
 
   protected templateFor(key: string): TemplateRef<unknown> | null {
     return this.cellTemplates()[key] ?? null;
+  }
+
+  /** Sort direction shown for a column: 'asc' | 'desc' | null (inactive). */
+  protected sortOf(col: ColumnDef): 'asc' | 'desc' | null {
+    const s = this.sort();
+    return s && s.column === col.key ? s.direction : null;
+  }
+
+  /** ARIA sort value for a header cell. */
+  protected ariaSort(col: ColumnDef): 'ascending' | 'descending' | 'none' | null {
+    if (!col.sortable) return null;
+    const dir = this.sortOf(col);
+    return dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none';
+  }
+
+  protected onHeaderSort(col: ColumnDef): void {
+    if (col.sortable) {
+      this.sortChange.emit(col.key);
+    }
   }
 }

@@ -89,6 +89,8 @@
             [columns]="columns"
             [rows]="rows()"
             [cellTemplates]="cellTemplates()"
+            [sort]="sort()"
+            (sortChange)="onSort($event)"
             (rowSelect)="onRowSelect($event)"
           />
         }

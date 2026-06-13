@@ -9,3 +9,37 @@
 .stoqr-data-table__row {
   cursor: pointer;
 }
+
+// Sortable headers (US-14): clickable, with a directional indicator. These th
+// are in this component's view, so the scoped styles reach them.
+th.is-sortable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: var(--color-pine);
+  }
+}
+
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.sort-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  // Neutral (unsorted) double-arrow is muted; the active arrow inherits the
+  // header colour (which turns Pine on hover/active).
+  &--neutral {
+    opacity: 0.45;
+  }
+}

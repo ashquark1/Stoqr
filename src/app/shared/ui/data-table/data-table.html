@@ -10,7 +10,30 @@
   <ng-template pTemplate="header">
     <tr>
       @for (col of columns(); track col.key) {
-        <th>{{ col.header }}</th>
+        <th
+          [class.is-sortable]="col.sortable"
+          [attr.aria-sort]="ariaSort(col)"
+          (click)="onHeaderSort(col)"
+        >
+          <span class="th-content">
+            {{ col.header }}
+            @if (col.sortable) {
+              <span class="sort-icon" aria-hidden="true">
+                @switch (sortOf(col)) {
+                  @case ('asc') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6" /></svg>
+                  }
+                  @case ('desc') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 10 6 6 6-6" /></svg>
+                  }
+                  @default {
+                    <svg class="sort-icon--neutral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 9 4-4 4 4" /><path d="m8 15 4 4 4-4" /></svg>
+                  }
+                }
+              </span>
+            }
+          </span>
+        </th>
       }
     </tr>
   </ng-template>

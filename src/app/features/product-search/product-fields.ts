@@ -13,6 +13,8 @@ interface ProductField {
   readonly badge?: boolean;
   /** Render this field as a product-status badge (table + modal — US-13). */
   readonly statusBadge?: boolean;
+  /** Whether the results-table header for this field is sortable (US-14). */
+  readonly sortable?: boolean;
 }
 
 /**
@@ -21,7 +23,7 @@ interface ProductField {
  */
 const PRODUCT_FIELDS: readonly ProductField[] = [
   // Product Info
-  { key: 'productName', label: 'Product Name', group: 'product', cellType: 'text' },
+  { key: 'productName', label: 'Product Name', group: 'product', cellType: 'text', sortable: true },
   { key: 'brand', label: 'Brand', group: 'product', cellType: 'text' },
   { key: 'category', label: 'Category', group: 'product', cellType: 'text' },
   { key: 'subCategory', label: 'Sub-category', group: 'product', cellType: 'text' },
@@ -30,7 +32,7 @@ const PRODUCT_FIELDS: readonly ProductField[] = [
   { key: 'color', label: 'Color', group: 'product', cellType: 'text' },
   { key: 'status', label: 'Status', group: 'product', cellType: 'text', statusBadge: true },
   // Stock Info
-  { key: 'stockQty', label: 'Stock Qty', group: 'stock', cellType: 'number' },
+  { key: 'stockQty', label: 'Stock Qty', group: 'stock', cellType: 'number', sortable: true },
   { key: 'lowStockThreshold', label: 'Low Stock Threshold', group: 'stock', cellType: 'number' },
   { key: 'stockStatus', label: 'Stock Status', group: 'stock', cellType: 'text', badge: true },
   { key: 'unitOfMeasure', label: 'Unit of Measure', group: 'stock', cellType: 'text' },
@@ -58,6 +60,7 @@ export const PRODUCT_COLUMNS: readonly ColumnDef[] = PRODUCT_FIELDS.map((f) => (
   key: f.key,
   header: f.label,
   cellType: f.cellType,
+  sortable: f.sortable ?? false,
 }));
 
 /** Modal field groups (AC-13): Product / Stock / Pricing / Additional. */

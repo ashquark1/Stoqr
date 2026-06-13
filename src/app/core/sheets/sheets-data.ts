@@ -48,6 +48,12 @@ export class SheetsData {
   private readonly _searchTerm = signal('');
   /** When the sheet was last fetched successfully — drives the freshness label (US-11). */
   private readonly _fetchedAt = signal<Date | null>(null);
+  /**
+   * Increments each time a NEW search session starts (not on refresh). Lets
+   * transient view state that must survive a refresh but reset on a new search
+   * — e.g. the sort (US-14) — distinguish the two.
+   */
+  private readonly _searchSerial = signal(0);
 
   readonly products = this._products.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -56,6 +62,7 @@ export class SheetsData {
   readonly hasSearched = this._hasSearched.asReadonly();
   readonly searchTerm = this._searchTerm.asReadonly();
   readonly fetchedAt = this._fetchedAt.asReadonly();
+  readonly searchSerial = this._searchSerial.asReadonly();
 
   /**
    * The product list the UI renders: Active products only (AC-10). The Active
@@ -158,6 +165,7 @@ export class SheetsData {
 
     if (!this.sessionActive && trimmed.length >= MIN_QUERY_LENGTH) {
       this.sessionActive = true;
+      this._searchSerial.update((n) => n + 1);
       this.debouncedTrigger$.next();
     }
   }
@@ -180,6 +188,7 @@ export class SheetsData {
 
     if (!this.sessionActive) {
       this.sessionActive = true;
+      this._searchSerial.update((n) => n + 1);
       this.immediateTrigger$.next(false);
     }
   }

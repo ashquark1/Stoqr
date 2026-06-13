@@ -14,6 +14,8 @@ import { Product } from '@core/models/product';
 import { ProductSearchStore } from '@core/search/product-search-store';
 import { SheetsData } from '@core/sheets/sheets-data';
 import { FilterService } from '@core/filter/filter-service';
+import { SortColumn } from '@core/sort/product-sort';
+import { SortService } from '@core/sort/sort-service';
 import { resolveStockVariant } from '@core/stock-status';
 import { Badge } from '@shared/ui/badge/badge';
 import { StatusBadge } from '@shared/ui/status-badge/status-badge';
@@ -60,6 +62,7 @@ export class ProductSearch {
   private readonly store = inject(SheetsData);
   private readonly search = inject(ProductSearchStore);
   private readonly filters = inject(FilterService);
+  private readonly sorting = inject(SortService);
 
   protected readonly searchControl = new FormControl('', { nonNullable: true });
 
@@ -78,9 +81,11 @@ export class ProductSearch {
   protected readonly message = this.search.message;
   protected readonly visibleProducts = this.search.visibleProducts;
   protected readonly resultCount = computed(() => this.visibleProducts().length);
+  /** Sorted view (US-14) — what the table renders; count stays on the unsorted set. */
   protected readonly rows = computed<readonly DataTableRow[]>(
-    () => this.visibleProducts() as unknown as readonly DataTableRow[],
+    () => this.search.sortedProducts() as unknown as readonly DataTableRow[],
   );
+  protected readonly sort = this.search.sort;
 
   protected readonly selectedProduct = signal<Product | null>(null);
   protected readonly modalOpen = computed(() => this.selectedProduct() !== null);
@@ -127,6 +132,11 @@ export class ProductSearch {
 
   protected onRowSelect(row: DataTableRow): void {
     this.selectedProduct.set(row as unknown as Product);
+  }
+
+  /** A sortable header was clicked — cycle that column's sort (US-14). */
+  protected onSort(column: string): void {
+    this.sorting.cycle(column as SortColumn);
   }
 
   protected onModalClose(): void {

@@ -15,4 +15,6 @@ export interface ColumnDef {
   readonly cellType?: CellType;
   /** Optional extra class applied to the cell. */
   readonly cssClass?: string;
+  /** Whether this column's header is clickable to sort (US-14). */
+  readonly sortable?: boolean;
 }
