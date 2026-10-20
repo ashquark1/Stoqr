@@ -93,7 +93,14 @@
 .stoqr-search__input {
   min-width: 0;
   height: 100%; // fill the 44/52px bar so the whole height is tappable (AC-11)
+  // ≥16px stops iOS Safari auto-zooming the page when the field is focused;
+  // back to the brand's 15px from tablet up (no touch-zoom on desktop).
+  font-size: 16px;
   text-overflow: ellipsis;
+
+  @include bp.from(tablet) {
+    font-size: 15px;
+  }
 }
 
 // ----- Icon buttons (Search + Refresh): icon-only on mobile, +label ≥768 -----

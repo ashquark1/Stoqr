@@ -9,6 +9,6 @@ export const environment = {
   sheets: {
     // gviz endpoint for the single source-of-truth product sheet (read-only, V1).
     gvizUrl:
-      'https://docs.google.com/spreadsheets/d/1yvchzyHq0lGJe4LOBW-h37IxpoCh7yJrAwKlz2ydDt0/gviz/tq?tqx=out:json&tq&gid=0',
+      'https://docs.google.com/spreadsheets/d/105x2kk-hCfXmHdw8P0QUOtd5hbiDhEYR43EPljTqxEY/gviz/tq?tqx=out:json&tq&gid=0',
   },
 } as const;

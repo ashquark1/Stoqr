@@ -63,6 +63,28 @@ export const PRODUCT_COLUMNS: readonly ColumnDef[] = PRODUCT_FIELDS.map((f) => (
   sortable: f.sortable ?? false,
 }));
 
+/**
+ * Column order for mobile: the key stock-focused columns first, then every
+ * other column in its original order. Same columns as `PRODUCT_COLUMNS`, just
+ * reprioritized (US mobile-polish). Applied via a breakpoint-aware signal in the
+ * feature component; CSS can't reorder table columns.
+ */
+const MOBILE_PRIORITY_KEYS: readonly string[] = [
+  'productName',
+  'brand',
+  'stockQty',
+  'lowStockThreshold',
+  'stockStatus',
+];
+
+export const PRODUCT_COLUMNS_MOBILE: readonly ColumnDef[] = [
+  ...PRODUCT_COLUMNS.filter((c) => MOBILE_PRIORITY_KEYS.includes(c.key)).sort(
+    (a, b) =>
+      MOBILE_PRIORITY_KEYS.indexOf(a.key) - MOBILE_PRIORITY_KEYS.indexOf(b.key),
+  ),
+  ...PRODUCT_COLUMNS.filter((c) => !MOBILE_PRIORITY_KEYS.includes(c.key)),
+];
+
 /** Modal field groups (AC-13): Product / Stock / Pricing / Additional. */
 export const PRODUCT_FIELD_GROUPS: readonly FieldGroup<Product>[] = (
   ['product', 'stock', 'pricing', 'additional'] as const
