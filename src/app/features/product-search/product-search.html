@@ -86,7 +86,7 @@
           <stoqr-empty-state [message]="emptyMessage()" />
         } @else {
           <stoqr-data-table
-            [columns]="columns"
+            [columns]="columns()"
             [rows]="rows()"
             [cellTemplates]="cellTemplates()"
             [sort]="sort()"

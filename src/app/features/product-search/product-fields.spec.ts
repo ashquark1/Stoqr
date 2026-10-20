@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { PRODUCT_COLUMNS, PRODUCT_FIELD_GROUPS } from './product-fields';
+import {
+  PRODUCT_COLUMNS,
+  PRODUCT_COLUMNS_MOBILE,
+  PRODUCT_FIELD_GROUPS,
+} from './product-fields';
 
 describe('product fields config', () => {
   it('exposes all 20 columns (AC-02)', () => {
@@ -39,5 +43,38 @@ describe('product fields config', () => {
       (f) => f.key === 'stockStatus',
     );
     expect(stockStatus?.badge).toBe(true);
+  });
+
+  // Mobile reorders the columns: the stock-focused five first, then the rest in
+  // original order — same set of columns, just reprioritized.
+  it('puts the stock-focused columns first on mobile', () => {
+    expect(PRODUCT_COLUMNS_MOBILE.slice(0, 5).map((c) => c.key)).toEqual([
+      'productName',
+      'brand',
+      'stockQty',
+      'lowStockThreshold',
+      'stockStatus',
+    ]);
+  });
+
+  it('keeps the remaining mobile columns in their original order', () => {
+    const priority = new Set([
+      'productName',
+      'brand',
+      'stockQty',
+      'lowStockThreshold',
+      'stockStatus',
+    ]);
+    const restOriginal = PRODUCT_COLUMNS.filter((c) => !priority.has(c.key)).map(
+      (c) => c.key,
+    );
+    expect(PRODUCT_COLUMNS_MOBILE.slice(5).map((c) => c.key)).toEqual(restOriginal);
+  });
+
+  it('contains exactly the same columns as the desktop order', () => {
+    expect(PRODUCT_COLUMNS_MOBILE).toHaveLength(PRODUCT_COLUMNS.length);
+    expect(new Set(PRODUCT_COLUMNS_MOBILE.map((c) => c.key))).toEqual(
+      new Set(PRODUCT_COLUMNS.map((c) => c.key)),
+    );
   });
 });

@@ -29,8 +29,13 @@ import { Modal } from '@shared/ui/modal/modal';
 import { Toast } from '@shared/ui/toast/toast';
 import { displayValue } from '@shared/util/display-value';
 import { RelativeTimePipe } from '@shared/util/relative-time';
+import { ViewportService } from '@shared/util/viewport-service';
 
-import { PRODUCT_COLUMNS, PRODUCT_FIELD_GROUPS } from './product-fields';
+import {
+  PRODUCT_COLUMNS,
+  PRODUCT_COLUMNS_MOBILE,
+  PRODUCT_FIELD_GROUPS,
+} from './product-fields';
 
 /**
  * Search-as-primary-UI orchestrator. Drives the two layout states (hero ↔
@@ -63,10 +68,15 @@ export class ProductSearch {
   private readonly search = inject(ProductSearchStore);
   private readonly filters = inject(FilterService);
   private readonly sorting = inject(SortService);
+  private readonly viewport = inject(ViewportService);
 
   protected readonly searchControl = new FormControl('', { nonNullable: true });
 
-  protected readonly columns = PRODUCT_COLUMNS;
+  /** Mobile reorders the table columns (stock-focused first); desktop keeps the
+   *  full declaration order. Same columns either way. */
+  protected readonly columns = computed(() =>
+    this.viewport.isMobile() ? PRODUCT_COLUMNS_MOBILE : PRODUCT_COLUMNS,
+  );
   protected readonly groups = PRODUCT_FIELD_GROUPS;
 
   protected readonly loading = this.store.loading;
